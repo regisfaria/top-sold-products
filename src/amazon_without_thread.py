@@ -54,14 +54,7 @@ def get_bestsellers_links(page):
     
     try:
         headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0", "Accept-Encoding":"gzip, deflate", "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "DNT":"1","Connection":"close", "Upgrade-Insecure-Requests":"1"}
-        session = requests.Session()
-        # retry time = {backoff factor} * (2 ^ ({number of total retries} - 1))
-        retry = Retry(connect=5, backoff_factor=0.5)
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
-            
-        r = session.get("https://www.amazon.com/Best-Sellers-Home-Kitchen-Furniture/zgbs/home-garden/1063306/ref=zg_bs_pg_2?_encoding=UTF8&pg="+str(page), headers=headers)
+        r = requests.get("https://www.amazon.com/Best-Sellers-Home-Kitchen-Furniture/zgbs/home-garden/1063306/ref=zg_bs_pg_2?_encoding=UTF8&pg="+str(page), headers=headers)
         content = r.content
         soup = BeautifulSoup(content, features="lxml")
         product_links = []
@@ -160,16 +153,10 @@ if __name__ == '__main__':
     # to get the product info. I'll be using threading for more speed
     m = Manager()
     q = m.Queue()
-    p = {}
     for i in range(0, len(p_links)):
-        logger.debug("starting thread {}".format(i))
-        p[i] = threading.Thread(target=get_product_data, args=(p_links[i],q))
-        p[i].start()
-
-    # Join process
-    for i in range(0, len(p_links)):
-        p[i].join()
-    
+        logger.debug("scraping product #{}".format(i+1))
+        get_product_data(p_links[i], q)
+        
     p_name, p_price, p_rating_qtd, p_rating_overall, p_availability = [], [], [], [], []
     while q.empty() is not True:
         queue_top = q.get()
