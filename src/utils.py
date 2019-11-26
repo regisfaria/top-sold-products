@@ -1,14 +1,16 @@
+from pathlib import Path
+import csv
 # Here i'll be writting some utilitys that will help on the main codes
 
-# I must call this class as Product(price='x.xx', name='product', ...)
-class Product(object):
-    # update this when needed
-    def __init__(self, **kargs):
-        self.properties = {}
-        for key, value in kwargs.items():
-            properties[key] = value
+def get_project_root() -> Path:
+    return Path(__file__).parent.parent
 
-
-def write_to_csv(product_list):
-    # Here i'll write the products into a csv
-    pass
+def remove_duplicates(l):
+    duplicate_elements = []
+    for i in range(0, len(l)):
+        if i == len(l)-1:
+            break
+        if l[i] == l[i+1]:
+            duplicate_elements.append(l[i])
+    for i in range(0, len(duplicate_elements)):
+        l.remove(duplicate_elements[i])
